@@ -122,8 +122,8 @@ const AccountManager = {
           <div class="acc-col acc-col-expiry">${expiryText}</div>
           <div class="acc-col acc-col-status" style="color:${tokenStatusColor};">${tokenStatusText}</div>
           <div class="acc-col acc-col-actions">
-            ${!acc.apiKey ? `
-              <!-- 没有 API Key 时只显示获取 Token 和删除按钮 -->
+            ${!acc.apiKey || !acc.refreshToken ? `
+              <!-- Token 不完整时只显示获取 Token 和删除按钮 -->
               <button class="acc-btn-icon" data-tooltip="获取 Token" data-id="${acc.id}" data-account='${JSON.stringify(acc).replace(/'/g, "&apos;")}' onclick="AccountManager.getAccountToken(event)" style="color: #007aff;">
                 <i data-lucide="key" style="width: 13px; height: 13px;"></i>
               </button>
@@ -131,7 +131,7 @@ const AccountManager = {
                 <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
               </button>
             ` : `
-              <!-- 有 API Key 时显示所有操作按钮 -->
+              <!-- Token 完整时显示所有操作按钮 -->
               <button class="acc-btn-icon" data-tooltip="切换账号" data-id="${acc.id}" data-email="${acc.email}" data-password="${safePassword}" onclick="AccountManager.switchAccount(event)">
                 <i data-lucide="user" style="width: 13px; height: 13px; color: #6e6e73;"></i>
               </button>
