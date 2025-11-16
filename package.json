@@ -46,9 +46,6 @@
     "sql.js": "^1.10.3",
     "uuid": "^9.0.1"
   },
-  "optionalDependencies": {
-    "robotjs": "^0.6.0"
-  },
   "devDependencies": {
     "cross-env": "^10.1.0",
     "electron": "^26.6.10",
