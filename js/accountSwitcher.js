@@ -65,14 +65,23 @@ class WindsurfPathDetector {
     
     try {
       if (process.platform === 'win32') {
-        const { stdout } = await execAsync('tasklist');
+        const { stdout } = await execAsync('tasklist /FI "IMAGENAME eq Windsurf.exe"', { shell: 'cmd.exe' });
         return stdout.toLowerCase().includes('windsurf.exe');
       } else if (process.platform === 'darwin') {
-        const { stdout } = await execAsync('ps aux | grep -i windsurf | grep -v grep');
-        return stdout.trim().length > 0;
+        try {
+          const { stdout } = await execAsync('pgrep -f "Windsurf.app/Contents/MacOS/Windsurf"');
+          return stdout.trim().length > 0;
+        } catch {
+          // pgrep 返回非0表示没找到进程
+          return false;
+        }
       } else {
-        const { stdout } = await execAsync('ps aux | grep -i windsurf | grep -v grep');
-        return stdout.trim().length > 0;
+        try {
+          const { stdout } = await execAsync('pgrep -i windsurf');
+          return stdout.trim().length > 0;
+        } catch {
+          return false;
+        }
       }
     } catch {
       return false;
@@ -303,32 +312,39 @@ class AccountSwitcher {
     const initSqlJs = require('sql.js');
     const dbPath = WindsurfPathDetector.getDBPath();
     
-    // 备份数据库
-    await this.backupDB();
-    
-    // 读取数据库文件
-    const dbBuffer = await fs.readFile(dbPath);
-    
-    // 初始化 sql.js
-    const SQL = await initSqlJs();
-    const db = new SQL.Database(dbBuffer);
-    
     try {
-      // 如果 value 是对象，转为 JSON 字符串
-      const finalValue = typeof value === 'object' && !Buffer.isBuffer(value) 
-        ? JSON.stringify(value) 
-        : value;
+      // 备份数据库
+      await this.backupDB();
       
-      // 执行插入或更新
-      db.run('INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)', [key, finalValue]);
+      // 读取数据库文件
+      const dbBuffer = await fs.readFile(dbPath);
       
-      // 导出数据库
-      const data = db.export();
+      // 初始化 sql.js
+      const SQL = await initSqlJs();
+      const db = new SQL.Database(dbBuffer);
       
-      // 写回文件
-      await fs.writeFile(dbPath, data);
-    } finally {
-      db.close();
+      try {
+        // 如果 value 是对象，转为 JSON 字符串
+        const finalValue = typeof value === 'object' && !Buffer.isBuffer(value) 
+          ? JSON.stringify(value) 
+          : value;
+        
+        // 执行插入或更新
+        db.run('INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)', [key, finalValue]);
+        
+        // 导出数据库
+        const data = db.export();
+        
+        // 写回文件
+        await fs.writeFile(dbPath, data);
+        
+        console.log(`✅ 已写入数据库: ${key}`);
+      } finally {
+        db.close();
+      }
+    } catch (error) {
+      console.error(`❌ 写入数据库失败 (${key}):`, error);
+      throw error;
     }
   }
   
@@ -375,9 +391,18 @@ class AccountSwitcher {
         
         try {
           await WindsurfPathDetector.closeWindsurf();
-          log('[切号] ✅ Windsurf 已关闭');
+          
+          // 再次检查
+          const stillRunning = await WindsurfPathDetector.isRunning();
+          if (stillRunning) {
+            log('[切号] ⚠️ 检测到进程可能仍在运行');
+            log('[切号] ⚠️ 继续执行切换，如果失败请手动关闭 Windsurf 后重试');
+          } else {
+            log('[切号] ✅ Windsurf 已关闭');
+          }
         } catch (error) {
-          throw new Error(`无法自动关闭 Windsurf: ${error.message}\n请手动关闭后重试`);
+          log(`[切号] ⚠️ 关闭过程出现问题: ${error.message}`);
+          log('[切号] ⚠️ 继续执行切换，如果失败请手动关闭 Windsurf 后重试');
         }
       } else {
         log('[切号] ✅ Windsurf 未运行');
@@ -483,16 +508,19 @@ class AccountSwitcher {
       const SQL = await initSqlJs();
       const db = new SQL.Database(dbBuffer);
       
-      // 查询数据
-      const result = db.exec('SELECT value FROM ItemTable WHERE key = ?', ['windsurfAuthStatus']);
-      db.close();
-      
-      if (result.length > 0 && result[0].values.length > 0) {
-        const value = result[0].values[0][0];
-        return JSON.parse(value);
+      try {
+        // 查询数据
+        const result = db.exec('SELECT value FROM ItemTable WHERE key = ?', ['windsurfAuthStatus']);
+        
+        if (result.length > 0 && result[0].values.length > 0) {
+          const value = result[0].values[0][0];
+          return JSON.parse(value);
+        }
+        
+        return null;
+      } finally {
+        db.close();
       }
-      
-      return null;
     } catch (error) {
       console.error('获取当前账号失败:', error);
       return null;
