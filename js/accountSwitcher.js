@@ -306,17 +306,89 @@ class AccountSwitcher {
   }
   
   /**
-   * 写入数据库（使用纯 Node.js 实现）
+   * 写入数据库（使用系统 sqlite3 命令）
    */
   static async writeToDB(key, value) {
-    const SQLiteHelper = require('./sqliteHelper');
+    const { exec } = require('child_process');
+    const { promisify } = require('util');
+    const execAsync = promisify(exec);
     const dbPath = WindsurfPathDetector.getDBPath();
     
     try {
-      await SQLiteHelper.setValue(dbPath, key, value);
+      // 备份数据库
+      await this.backupDB();
+      
+      // 如果 value 是对象，转为 JSON 字符串
+      const finalValue = typeof value === 'object' && !Buffer.isBuffer(value) 
+        ? JSON.stringify(value) 
+        : value;
+      
+      // 转义单引号
+      const escapedKey = key.replace(/'/g, "''");
+      const escapedValue = finalValue.replace(/'/g, "''");
+      
+      // 构建 SQL 命令
+      const sql = `INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('${escapedKey}', '${escapedValue}');`;
+      
+      // 执行 sqlite3 命令
+      let command;
+      if (process.platform === 'win32') {
+        // Windows: 需要下载 sqlite3.exe 或使用 sql.js
+        // 这里回退到 sql.js
+        return await this.writeToDBWithSqlJs(key, value);
+      } else {
+        // macOS/Linux: 使用系统自带的 sqlite3
+        command = `sqlite3 "${dbPath}" "${sql}"`;
+      }
+      
+      await execAsync(command);
       console.log(`✅ 已写入数据库: ${key}`);
+      return true;
     } catch (error) {
       console.error(`❌ 写入数据库失败 (${key}):`, error);
+      // 回退到 sql.js
+      console.log('⚠️ 回退到 sql.js 方式');
+      return await this.writeToDBWithSqlJs(key, value);
+    }
+  }
+  
+  /**
+   * 使用 sql.js 写入数据库（备用方案）
+   */
+  static async writeToDBWithSqlJs(key, value) {
+    const initSqlJs = require('sql.js');
+    const dbPath = WindsurfPathDetector.getDBPath();
+    
+    try {
+      // 读取数据库文件
+      const dbBuffer = await fs.readFile(dbPath);
+      
+      // 初始化 sql.js
+      const SQL = await initSqlJs();
+      const db = new SQL.Database(dbBuffer);
+      
+      try {
+        // 如果 value 是对象，转为 JSON 字符串
+        const finalValue = typeof value === 'object' && !Buffer.isBuffer(value) 
+          ? JSON.stringify(value) 
+          : value;
+        
+        // 执行插入或更新
+        db.run('INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)', [key, finalValue]);
+        
+        // 导出数据库
+        const data = db.export();
+        
+        // 写回文件
+        await fs.writeFile(dbPath, data);
+        
+        console.log(`✅ 已写入数据库 (sql.js): ${key}`);
+        return true;
+      } finally {
+        db.close();
+      }
+    } catch (error) {
+      console.error(`❌ sql.js 写入失败:`, error);
       throw error;
     }
   }
@@ -467,17 +539,65 @@ class AccountSwitcher {
   }
   
   /**
-   * 获取当前登录的账号信息（使用纯 Node.js 实现）
+   * 获取当前登录的账号信息（使用系统 sqlite3 命令）
    */
   static async getCurrentAccount() {
-    const SQLiteHelper = require('./sqliteHelper');
+    const { exec } = require('child_process');
+    const { promisify } = require('util');
+    const execAsync = promisify(exec);
     const dbPath = WindsurfPathDetector.getDBPath();
     
     try {
-      const value = await SQLiteHelper.getValue(dbPath, 'windsurfAuthStatus');
-      return value;
+      let command;
+      if (process.platform === 'win32') {
+        // Windows: 回退到 sql.js
+        return await this.getCurrentAccountWithSqlJs();
+      } else {
+        // macOS/Linux: 使用系统自带的 sqlite3
+        const escapedKey = 'windsurfAuthStatus'.replace(/'/g, "''");
+        command = `sqlite3 "${dbPath}" "SELECT value FROM ItemTable WHERE key='${escapedKey}';"`;
+      }
+      
+      const { stdout } = await execAsync(command);
+      
+      if (stdout && stdout.trim()) {
+        return JSON.parse(stdout.trim());
+      }
+      
+      return null;
     } catch (error) {
       console.error('获取当前账号失败:', error);
+      // 回退到 sql.js
+      return await this.getCurrentAccountWithSqlJs();
+    }
+  }
+  
+  /**
+   * 使用 sql.js 获取当前账号（备用方案）
+   */
+  static async getCurrentAccountWithSqlJs() {
+    const initSqlJs = require('sql.js');
+    const dbPath = WindsurfPathDetector.getDBPath();
+    
+    try {
+      const dbBuffer = await fs.readFile(dbPath);
+      const SQL = await initSqlJs();
+      const db = new SQL.Database(dbBuffer);
+      
+      try {
+        const result = db.exec('SELECT value FROM ItemTable WHERE key = ?', ['windsurfAuthStatus']);
+        
+        if (result.length > 0 && result[0].values.length > 0) {
+          const value = result[0].values[0][0];
+          return JSON.parse(value);
+        }
+        
+        return null;
+      } finally {
+        db.close();
+      }
+    } catch (error) {
+      console.error('sql.js 获取账号失败:', error);
       return null;
     }
   }
