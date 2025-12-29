@@ -3,14 +3,20 @@ name: Build and Release
 on:
   workflow_dispatch:
 
+# ⭐ 必须，否则无法创建 Release / 上传附件
+permissions:
+  contents: write
+
 jobs:
   build-mac:
+    name: Build macOS (x64 + arm64)
     runs-on: macos-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -19,35 +25,20 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build macOS app
-        run: npx electron-builder --mac --x64 --arm64
+      - name: Build & Publish macOS app
+        env:
+          # ⭐ electron-builder 发布 GitHub Release 必需
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx electron-builder \
+            --mac \
+            --x64 \
+            --arm64
 
-      - name: Upload macOS artifact
+      - name: Upload macOS DMG artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Windsurf-Tool-macOS
-          path: release/*.dmg
-
-  # build-windows:
-  #   runs-on: windows-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-
-  #     - name: Set up Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '22'
-  #         cache: 'npm'
-
-  #     - name: Install dependencies
-  #       run: npm install
-
-  #     - name: Build Windows app
-  #       run: npm run build:win
-
-  #     - name: Upload Windows artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: Windsurf-Tool-Windows
-  #         path: release/*.exe
+          path: |
+            release/*.dmg
+            release/*.blockmap
