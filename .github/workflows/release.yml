@@ -22,7 +22,7 @@ jobs:
         run: npx electron-builder --mac --x64 --arm64
 
       - name: Upload macOS artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Windsurf-Tool-macOS
           path: release/*.dmg
@@ -45,7 +45,7 @@ jobs:
         run: npm run build:win
 
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Windsurf-Tool-Windows
           path: release/*.exe
