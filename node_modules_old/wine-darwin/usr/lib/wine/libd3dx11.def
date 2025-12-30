@@ -1,0 +1,8 @@
+; File generated automatically from ../source/dlls/d3dx11_43/d3dx11_43.spec; do not edit!
+
+LIBRARY d3dx11_43.dll
+
+EXPORTS
+  D3DX11CheckVersion@8 @1
+  D3DX11CompileFromMemory@52 @4
+  D3DX11GetImageInfoFromMemory@20 @32
