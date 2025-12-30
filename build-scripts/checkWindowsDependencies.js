@@ -63,45 +63,7 @@ const checks = [
       }
     }
   },
-  {
-    name: 'chrome-launcher',
-    check: () => {
-      const modulePath = path.join(__dirname, '..', 'node_modules', 'chrome-launcher');
-      if (fs.existsSync(modulePath)) {
-        console.log('✓ chrome-launcher: 已安装');
-        return true;
-      } else {
-        console.error('✗ chrome-launcher: 未安装');
-        return false;
-      }
-    }
-  },
-  {
-    name: 'puppeteer',
-    check: () => {
-      const modulePath = path.join(__dirname, '..', 'node_modules', 'puppeteer');
-      if (fs.existsSync(modulePath)) {
-        console.log('✓ puppeteer: 已安装');
-        return true;
-      } else {
-        console.error('✗ puppeteer: 未安装');
-        return false;
-      }
-    }
-  },
-  {
-    name: 'puppeteer-real-browser',
-    check: () => {
-      const modulePath = path.join(__dirname, '..', 'node_modules', 'puppeteer-real-browser');
-      if (fs.existsSync(modulePath)) {
-        console.log('✓ puppeteer-real-browser: 已安装');
-        return true;
-      } else {
-        console.error('✗ puppeteer-real-browser: 未安装');
-        return false;
-      }
-    }
-  },
+
   {
     name: 'icon.ico',
     check: () => {

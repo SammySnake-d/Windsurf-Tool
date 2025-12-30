@@ -9,9 +9,6 @@ const AutoBindCard = {
   
   // 绑卡配置
   config: {
-    // 填写模式: 'manual' = 手动填写, 'auto' = 自动填写
-    fillMode: 'manual',
-    
     // 账单信息
     billingName: '',
     billingCountry: 'CN',
@@ -1275,40 +1272,6 @@ const AutoBindCard = {
   },
 
   /**
-   * 切换填写模式
-   */
-  switchFillMode(mode) {
-    this.config.fillMode = mode;
-    
-    const manualLabel = document.getElementById('manualModeLabel');
-    const autoLabel = document.getElementById('autoModeLabel');
-    const descEl = document.getElementById('fillModeDesc');
-    
-    if (manualLabel && autoLabel) {
-      if (mode === 'manual') {
-        manualLabel.style.borderColor = '#007aff';
-        manualLabel.style.background = '#f0f7ff';
-        autoLabel.style.borderColor = '#ddd';
-        autoLabel.style.background = 'transparent';
-      } else {
-        autoLabel.style.borderColor = '#34c759';
-        autoLabel.style.background = '#f0fdf4';
-        manualLabel.style.borderColor = '#ddd';
-        manualLabel.style.background = 'transparent';
-      }
-    }
-    
-    if (descEl) {
-      if (mode === 'manual') {
-        descEl.innerHTML = '<i data-lucide="info" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>手动模式：打开浏览器后显示卡片信息，您需要手动复制填写';
-      } else {
-        descEl.innerHTML = '<i data-lucide="info" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>自动模式：自动打开浏览器并填写卡片信息（需要安装 Chrome 浏览器）';
-      }
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-  },
-
-  /**
    * 随机生成账单信息（页面视图）
    */
   randomizeBillingView() {
@@ -1512,47 +1475,15 @@ const AutoBindCard = {
         };
       }
       
-      // 3. 根据填写模式处理
-      if (this.config.fillMode === 'auto') {
-        // 自动填写模式 - 显示日志弹窗
-        this.showAutoFillLogModal();
-        this.updateStatusView('正在启动浏览器并自动填写...');
-        
-        const autoFillResult = await window.ipcRenderer.invoke('auto-fill-payment', {
-          paymentLink: linkResult.paymentLink,
-          card: cardInfo,
-          billing: {
-            name: this.config.billingName,
-            country: this.config.billingCountry,
-            state: this.config.billingState,
-            city: this.config.billingCity,
-            district: this.config.billingDistrict,
-            address: this.config.billingAddress,
-            address2: this.config.billingAddress2,
-            postalCode: this.config.billingPostalCode
-          }
-        });
-        
-        if (autoFillResult.success) {
-          this.updateStatusView('自动填写完成，请在浏览器中确认并点击订阅按钮', 'success');
-          this.addAutoFillLog('✓ 自动填写完成', 'success');
-        } else {
-          this.updateStatusView('自动填写失败: ' + autoFillResult.error, 'error');
-          this.addAutoFillLog('✗ ' + autoFillResult.error, 'error');
-          // 失败时显示卡片信息供手动填写
-          this.showCardInfoModal(cardInfo, this.config);
-        }
-      } else {
-        // 手动填写模式
-        this.updateStatusView('正在打开浏览器...');
-        
-        await window.ipcRenderer.invoke('open-external-url', linkResult.paymentLink);
-        
-        this.updateStatusView('浏览器已打开，请在浏览器中完成支付', 'success');
-        
-        // 显示卡片信息弹窗
-        this.showCardInfoModal(cardInfo, this.config);
-      }
+      // 3. 打开浏览器并显示卡片信息
+      this.updateStatusView('正在打开浏览器...');
+      
+      await window.ipcRenderer.invoke('open-external-url', linkResult.paymentLink);
+      
+      this.updateStatusView('浏览器已打开，请在浏览器中完成支付', 'success');
+      
+      // 显示卡片信息弹窗
+      this.showCardInfoModal(cardInfo, this.config);
       
     } catch (error) {
       this.updateStatusView('绑卡失败: ' + error.message, 'error');
@@ -1596,72 +1527,6 @@ const AutoBindCard = {
     // 再加载到视图
     this.loadViewConfig();
     this.refreshAccountList();
-    
-    // 监听自动填写日志
-    if (window.ipcRenderer) {
-      window.ipcRenderer.on('auto-fill-log', (event, message) => {
-        this.addAutoFillLog(message);
-      });
-    }
-  },
-
-  /**
-   * 显示自动填写日志弹窗
-   */
-  showAutoFillLogModal() {
-    // 移除已存在的弹窗
-    const existing = document.getElementById('autoFillLogModal');
-    if (existing) existing.remove();
-    
-    const modal = document.createElement('div');
-    modal.id = 'autoFillLogModal';
-    modal.className = 'modal-overlay active';
-    modal.style.zIndex = '10002';
-    modal.innerHTML = `
-      <div class="modal-dialog modern-modal" style="max-width: 450px;" onclick="event.stopPropagation()">
-        <div class="modern-modal-header" style="padding: 14px 16px;">
-          <div class="modal-title-row">
-            <i data-lucide="terminal" style="width: 16px; height: 16px; color: #007aff;"></i>
-            <h3 style="margin: 0; font-size: 14px; font-weight: 600;">自动填写日志</h3>
-          </div>
-          <button class="modal-close-btn" onclick="document.getElementById('autoFillLogModal').remove()" style="width: 24px; height: 24px;">
-            <i data-lucide="x" style="width: 14px; height: 14px;"></i>
-          </button>
-        </div>
-        <div class="modern-modal-body" style="padding: 12px;">
-          <div id="autoFillLogContent" style="max-height: 300px; overflow-y: auto; background: #18181b; border-radius: 6px; padding: 10px; font-family: 'SF Mono', Monaco, monospace; font-size: 11px; color: #a1a1aa; line-height: 1.6;">
-            <div style="color: #86868b;">正在启动...</div>
-          </div>
-        </div>
-        <div class="modern-modal-footer" style="padding: 12px 16px;">
-          <button class="btn btn-secondary" onclick="document.getElementById('autoFillLogModal').remove()" style="font-size: 12px; padding: 6px 16px;">关闭</button>
-        </div>
-      </div>
-    `;
-    
-    document.body.appendChild(modal);
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-  },
-
-  /**
-   * 添加自动填写日志
-   */
-  addAutoFillLog(message, type = 'info') {
-    const container = document.getElementById('autoFillLogContent');
-    if (!container) return;
-    
-    const colors = {
-      info: '#a1a1aa',
-      success: '#22c55e',
-      error: '#ef4444',
-      warning: '#f59e0b'
-    };
-    
-    const div = document.createElement('div');
-    div.style.color = colors[type] || colors.info;
-    div.textContent = message;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
   }
 };
 

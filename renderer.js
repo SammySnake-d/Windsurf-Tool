@@ -1289,7 +1289,6 @@ let switchAccountsCache = [];
 let selectedSwitchAccountId = '';
 let usedAccountIds = new Set(); // 已使用账号ID集合（持久化到localStorage）
 let deleteMode = false; // 账号管理-删除账号模式
-let isRegistering = false; // 批量注册进行中标志，防止重复点击
 
 function loadUsedAccountsFromStorage() {
   try {
@@ -1310,7 +1309,7 @@ function saveUsedAccountsToStorage() {
 // 标签页逻辑（页面特定的初始化）
 window.switchTabLogic = function(tabName) {
   if (tabName === 'register') {
-    // 合并后：在“批量注册 / 账号管理”页刷新账号列表
+    // 在"账号管理"页刷新账号列表
     loadAccounts();
   } else if (tabName === 'switch') {
     loadAccountsForSwitch();
@@ -1468,124 +1467,6 @@ function restoreUsedAccount(id) {
   renderUsedAccountsGrid();
 }
 
-// ==================== 批量注册 ====================
-
-async function startBatchRegister() {
-  // 防止重复点击
-  if (isRegistering) {
-    addRegisterLog('批量注册正在进行中，请勿重复点击', 'warning');
-    return;
-  }
-  
-  const count = parseInt(document.getElementById('registerCount').value);
-  const threads = parseInt(document.getElementById('registerThreads').value);
-  
-  if (!count || count < 1) {
-    showCustomAlert('请输入有效的注册数量', 'warning');
-    return;
-  }
-  
-  if (!threads || threads < 1) {
-    showCustomAlert('请输入有效的并发数', 'warning');
-    return;
-  }
-  
-  if (!currentConfig.emailConfig) {
-    showCustomAlert('请先在系统设置中配置IMAP邮箱', 'warning');
-    return;
-  }
-  
-  // 切换到进度视图
-  if (typeof showRegisterProgress === 'function') {
-    showRegisterProgress();
-  }
-  
-  // 设置注册状态
-  isRegistering = true;
-  
-  // 初始化统计
-  updateRegisterStats(count, 0, 0, 0);
-  addRegisterLog(`开始批量注册，总数量: ${count}, 并发数: ${threads}`, 'info');
-  
-  try {
-    // 注册前强制刷新域名配置（避免使用缓存）
-    if (window.DomainManager && window.DomainManager.init) {
-      await window.DomainManager.init();
-      addRegisterLog(`📋 已刷新域名配置: ${currentConfig.emailDomains.join(', ')}`, 'info');
-    }
-    
-    const result = await window.ipcRenderer.invoke('batch-register', {
-      count,
-      threads,
-      ...currentConfig
-    });
-    
-    const successCount = result.filter(r => r.success).length;
-    const failedCount = result.filter(r => !r.success).length;
-    const failedResults = result.filter(r => !r.success);
-    
-    // 更新统计
-    updateRegisterStats(count, successCount, failedCount, 100);
-    
-    // 输出结果日志
-    result.forEach((r, index) => {
-      if (r.success) {
-        addRegisterLog(`✓ [${index + 1}/${count}] 注册成功: ${r.email}`, 'success');
-      } else {
-        addRegisterLog(`✗ [${index + 1}/${count}] 注册失败: ${r.error || '未知错误'}`, 'error');
-      }
-    });
-    
-    addRegisterLog(`批量注册完成！成功: ${successCount}, 失败: ${failedCount}`, successCount > 0 ? 'success' : 'error');
-    
-    // 刷新账号列表
-    loadAccounts();
-  } catch (error) {
-    console.error('批量注册错误:', error);
-    addRegisterLog(`批量注册失败: ${error.message || '未知错误'}`, 'error');
-  } finally {
-    // 恢复状态
-    isRegistering = false;
-  }
-}
-
-// 取消批量注册
-async function cancelBatchRegister() {
-  if (!isRegistering) {
-    return;
-  }
-  
-  addRegisterLog('正在取消批量注册...', 'warning');
-  
-  try {
-    const result = await window.ipcRenderer.invoke('cancel-batch-register');
-    if (result.success) {
-      addRegisterLog('批量注册已取消', 'info');
-      isRegistering = false;
-    } else {
-      addRegisterLog(`取消失败: ${result.message || '未知错误'}`, 'error');
-    }
-  } catch (error) {
-    console.error('取消注册错误:', error);
-    addRegisterLog(`取消失败: ${error.message}`, 'error');
-  }
-}
-
-// 监听注册进度
-window.ipcRenderer.on('registration-progress', (event, progress) => {
-  const percent = Math.round((progress.current / progress.total) * 100);
-  updateRegisterStats(progress.total, progress.success || 0, progress.failed || 0, percent);
-  addRegisterLog(`进度: ${progress.current}/${progress.total} (${percent}%)`, 'info');
-});
-
-// 监听实时日志
-window.ipcRenderer.on('registration-log', (event, log) => {
-  if (log && log.message) {
-    addRegisterLog(log.message, log.type || 'info');
-  } else if (typeof log === 'string') {
-    addRegisterLog(log, 'info');
-  }
-});
 
 // ==================== 账号管理 ====================
 
