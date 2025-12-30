@@ -1682,92 +1682,7 @@
       margin: 0 4px;
     }
 
-    /* 批量注册面板 */
-    .batch-register-panel {
-      background: transparent;
-      border: none;
-      padding: 0;
-    }
 
-    .batch-register-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text-main);
-      margin-bottom: 0;
-      margin-right: 24px;
-      padding-bottom: 0;
-      border: none;
-      padding: 0;
-    }
-
-    .batch-register-controls {
-      display: flex;
-      gap: 16px;
-      align-items: flex-end;
-      flex-wrap: nowrap;
-    }
-
-    .input-field-group {
-      display: flex;
-      gap: 12px;
-      flex: 1;
-      min-width: 280px;
-    }
-
-    .input-field {
-      flex: 1;
-      min-width: 120px;
-    }
-
-    .input-field label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-
-    .input-field input {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      font-size: 14px;
-      transition: all 0.2s ease;
-      background: #f8fafc;
-      color: var(--text-main);
-    }
-
-    .input-field input:focus {
-      outline: none;
-      background: #fff;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-    }
-
-    .input-field input::placeholder {
-      color: #94a3b8;
-    }
-
-    .batch-register-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn-register {
-      min-width: auto;
-      padding: 8px 16px;
-      font-weight: 600;
-    }
-
-    .btn-cancel {
-      min-width: 120px;
-      font-weight: 600;
     }
 
     /* 正在开发页面 */
@@ -1988,147 +1903,6 @@
       margin-top: 1px;
     }
 
-    /* 批量注册弹窗 */
-    .register-modal {
-      max-width: 480px;
-      width: 90%;
-      max-height: 80vh;
-      display: flex;
-      flex-direction: column;
-      border-radius: 16px;
-      overflow: hidden;
-      background: #fff;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    }
-
-    .register-modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border);
-      background: #fff;
-    }
-
-    .register-modal-body {
-      padding: 24px;
-      flex: 1;
-      min-height: 0;
-      overflow: visible;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      background: #fff;
-    }
-
-    .register-stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      padding: 16px;
-      background: var(--bg-body);
-      border-radius: var(--radius-lg);
-    }
-
-    .register-stat-item {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .stat-value.success {
-      color: #16a34a;
-    }
-
-    .stat-value.error {
-      color: #ef4444;
-    }
-
-    .register-log-container {
-      flex: 0 0 auto;
-      height: 250px;
-      background: #0f172a;
-      border-radius: var(--radius-md);
-      overflow: visible;
-      border: 1px solid #334155;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .register-log {
-      height: 200px;
-      max-height: 200px;
-      overflow-y: scroll !important;
-      overflow-x: hidden;
-      padding: 12px;
-      font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Menlo', 'Consolas', monospace;
-      font-size: 11px;
-      line-height: 1.6;
-      color: #e2e8f0;
-    }
-
-    .register-log::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .register-log::-webkit-scrollbar-track {
-      background: #2d2d2d;
-    }
-
-    .register-log::-webkit-scrollbar-thumb {
-      background: #555;
-      border-radius: 4px;
-    }
-
-    .register-log::-webkit-scrollbar-thumb:hover {
-      background: #666;
-    }
-
-    .log-entry {
-      margin-bottom: 4px;
-      word-wrap: break-word;
-    }
-
-    .log-timestamp {
-      color: #858585;
-      margin-right: 8px;
-    }
-
-    .log-info {
-      color: #4ec9b0;
-    }
-
-    .log-success {
-      color: #4ec9b0;
-    }
-
-    .log-error {
-      color: #f48771;
-    }
-
-    .log-warning {
-      color: #dcdcaa;
-    }
-
-    .register-modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
-    }
 
     /* 下拉菜单 */
     .dropdown-container {
@@ -2872,17 +2646,13 @@
           <div class="app-logo-icon"><img src="https://windsurf.com/favicon.png" alt="Windsurf"></div>
           <div class="app-logo-text">Windsurf Tool</div>
         </div>
-        <div class="app-version">批量注册 一键切号 获取绑卡链接</div>
+        <div class="app-version">一键切号 获取绑卡链接</div>
       </div>
 
       <nav class="sidebar-nav">
         <button class="nav-item active" onclick="switchView('register')">
           <i data-lucide="users" class="nav-item-icon"></i>
           <span>账号管理</span>
-        </button>
-        <button class="nav-item" onclick="openBatchRegisterModal()">
-          <i data-lucide="zap" class="nav-item-icon"></i>
-          <span>批量注册</span>
         </button>
         <button class="nav-item" onclick="switchView('autoBindCard')">
           <i data-lucide="credit-card" class="nav-item-icon"></i>
@@ -3033,21 +2803,7 @@
                     <option value="">-- 请选择账号 --</option>
                   </select>
                 </div>
-                <div class="setting-input-wrapper">
-                  <label class="setting-label">填写模式</label>
-                  <div style="display: flex; gap: 8px;">
-                    <label style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 8px; border: 2px solid #007aff; background: #f0f7ff;" id="manualModeLabel">
-                      <input type="radio" name="fillMode" value="manual" checked onchange="AutoBindCard.switchFillMode('manual')" style="display: none;">
-                      <i data-lucide="mouse-pointer-click" style="width: 14px; height: 14px; color: #007aff;"></i>
-                      <span style="font-size: 13px; color: #007aff; font-weight: 500;">手动填写</span>
-                    </label>
-                    <label style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 10px; border-radius: 8px; border: 2px solid #e2e8f0; background: transparent;" id="autoModeLabel">
-                      <input type="radio" name="fillMode" value="auto" onchange="AutoBindCard.switchFillMode('auto')" style="display: none;">
-                      <i data-lucide="bot" style="width: 14px; height: 14px; color: #64748b;"></i>
-                      <span style="font-size: 13px; color: #64748b; font-weight: 500;">自动填写</span>
-                    </label>
-                  </div>
-                </div>
+
               </div>
             </div>
           </div>
@@ -3340,7 +3096,7 @@
             
             <section>
               <h2>快速开始</h2>
-              <p><strong>批量注册：</strong>点击"注册"按钮，设置数量，系统会自动完成注册流程。</p>
+
               <p><strong>获取 Token：</strong>点击"Token"按钮，系统会自动登录并获取 Token。</p>
               <p><strong>切换账号：</strong>点击账号邮箱，系统会自动切换到 Windsurf。</p>
             </section>
@@ -3412,89 +3168,6 @@
     </main>
   </div>
 
-  <!-- 批量注册弹窗 -->
-  <div id="batchRegisterModal" class="modal-overlay" style="display:none;">
-    <div class="modal-dialog register-modal" onclick="event.stopPropagation()">
-      <div class="register-modal-header">
-        <div class="modal-title-row">
-          <i data-lucide="zap" style="width: 24px; height: 24px; color: #007aff;"></i>
-          <h3 class="modal-title">批量注册</h3>
-        </div>
-        <button class="modal-close-btn" onclick="closeBatchRegisterModal()" title="关闭">
-          <i data-lucide="x" style="width: 20px; height: 20px;"></i>
-        </button>
-      </div>
-      
-      <div class="register-modal-body">
-        <!-- 配置区域 -->
-        <div id="registerConfigSection" style="margin-bottom: 16px;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-            <div>
-              <label style="display: block; font-size: 13px; font-weight: 500; color: #1d1d1f; margin-bottom: 6px;">注册数量</label>
-              <input type="number" id="registerCount" value="1" min="1" max="50" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
-            </div>
-            <div>
-              <label style="display: block; font-size: 13px; font-weight: 500; color: #1d1d1f; margin-bottom: 6px;">并发线程</label>
-              <input type="number" id="registerThreads" value="1" min="1" max="10" style="width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
-            </div>
-          </div>
-          <button class="btn btn-primary" onclick="startBatchRegister()" style="width: 100%; padding: 12px; font-size: 14px; justify-content: center;">
-            <i data-lucide="play" style="width: 16px; height: 16px;"></i>
-            开始注册
-          </button>
-        </div>
-        
-        <!-- 注册统计信息 -->
-        <div class="register-stats" id="registerStatsSection" style="display: none;">
-          <div class="register-stat-item">
-            <span class="stat-label">总数量:</span>
-            <span class="stat-value" id="modalTotalCount">0</span>
-          </div>
-          <div class="register-stat-item">
-            <span class="stat-label">成功:</span>
-            <span class="stat-value success" id="modalSuccessCount">0</span>
-          </div>
-          <div class="register-stat-item">
-            <span class="stat-label">失败:</span>
-            <span class="stat-value error" id="modalFailCount">0</span>
-          </div>
-          <div class="register-stat-item">
-            <span class="stat-label">进度:</span>
-            <span class="stat-value" id="modalProgress">0%</span>
-          </div>
-        </div>
-        
-        <!-- 日志显示区域 -->
-        <div class="register-log-container" id="registerLogSection" style="display: none;">
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #2d2d2d; border-bottom: 1px solid #444;">
-            <span style="color: #d4d4d4; font-size: 12px; font-weight: 600; letter-spacing: 0.5px;">实时日志</span>
-            <button 
-              onclick="copyRegisterLog()" 
-              style="background: #007aff; border: none; color: white; padding: 6px 14px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0, 122, 255, 0.3);"
-              onmouseover="this.style.background='#0051d5'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 6px rgba(0, 122, 255, 0.4)'"
-              onmouseout="this.style.background='#007aff'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0, 122, 255, 0.3)'"
-              title="复制全部日志到剪贴板">
-              <i data-lucide="copy" style="width: 13px; height: 13px;"></i>
-              复制日志
-            </button>
-          </div>
-          <div class="register-log" id="registerLog"></div>
-        </div>
-        
-        <!-- 底部按钮 -->
-        <div class="register-modal-footer" id="registerFooterSection" style="display: none;">
-          <button class="btn btn-danger" id="modalCancelBtn" onclick="cancelBatchRegister()">
-            <i data-lucide="x-circle" style="width: 16px; height: 16px;"></i>
-            取消注册
-          </button>
-          <button class="btn btn-secondary" onclick="closeBatchRegisterModal()">
-            <i data-lucide="x" style="width: 16px; height: 16px;"></i>
-            关闭
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- 登录获取 Token 弹窗 -->
   <div id="loginTokenModal" class="modal-overlay" style="display:none;">
@@ -3904,66 +3577,7 @@
       }
     }
     
-    // 批量注册弹窗控制
-    let batchRegisterEscHandler = null;
-    
-    function openBatchRegisterModal() {
-      const modal = document.getElementById('batchRegisterModal');
-      const logEl = document.getElementById('registerLog');
-      
-      // 清空日志
-      if (logEl) {
-        logEl.innerHTML = '';
-      }
-      
-      // 重置统计
-      document.getElementById('modalTotalCount').textContent = '0';
-      document.getElementById('modalSuccessCount').textContent = '0';
-      document.getElementById('modalFailCount').textContent = '0';
-      document.getElementById('modalProgress').textContent = '0%';
-      
-      // 显示配置区域，隐藏进度区域
-      document.getElementById('registerConfigSection').style.display = 'block';
-      document.getElementById('registerStatsSection').style.display = 'none';
-      document.getElementById('registerLogSection').style.display = 'none';
-      document.getElementById('registerFooterSection').style.display = 'none';
-      
-      // 显示弹窗
-      modal.style.display = 'flex';
-      
-      // 添加 ESC 键关闭监听
-      batchRegisterEscHandler = function(e) {
-        if (e.key === 'Escape') {
-          closeBatchRegisterModal();
-        }
-      };
-      document.addEventListener('keydown', batchRegisterEscHandler);
-      
-      // 初始化图标
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-      }
-    }
-    
-    // 开始注册时切换到进度视图
-    function showRegisterProgress() {
-      document.getElementById('registerConfigSection').style.display = 'none';
-      document.getElementById('registerStatsSection').style.display = 'grid';
-      document.getElementById('registerLogSection').style.display = 'block';
-      document.getElementById('registerFooterSection').style.display = 'flex';
-    }
-    
-    function closeBatchRegisterModal() {
-      const modal = document.getElementById('batchRegisterModal');
-      modal.style.display = 'none';
-      
-      // 移除 ESC 键监听
-      if (batchRegisterEscHandler) {
-        document.removeEventListener('keydown', batchRegisterEscHandler);
-        batchRegisterEscHandler = null;
-      }
-    }
-    
+
     // 登录获取 Token 弹窗控制
     function closeLoginTokenModal() {
       const modal = document.getElementById('loginTokenModal');
@@ -4007,63 +3621,7 @@
       }
     }
     
-    // 添加日志到弹窗
-    function addRegisterLog(message, type = 'info') {
-      const logEl = document.getElementById('registerLog');
-      if (!logEl) {
-        console.warn('[addRegisterLog] registerLog 元素不存在');
-        return;
-      }
-      
-      const timestamp = new Date().toLocaleTimeString('zh-CN', { hour12: false });
-      const logEntry = document.createElement('div');
-      logEntry.className = 'log-entry';
-      
-      let colorClass = 'log-info';
-      if (type === 'success') colorClass = 'log-success';
-      else if (type === 'error') colorClass = 'log-error';
-      else if (type === 'warning') colorClass = 'log-warning';
-      
-      logEntry.innerHTML = `<span class="log-timestamp">[${timestamp}]</span><span class="${colorClass}">${message}</span>`;
-      logEntry.setAttribute('data-log-text', `[${timestamp}] ${message}`);
-      logEl.appendChild(logEntry);
-      
-      // 立即滚动到底部
-      logEl.scrollTop = logEl.scrollHeight + 1000;
-    }
-    
-    // 复制注册日志
-    function copyRegisterLog() {
-      const logEl = document.getElementById('registerLog');
-      if (!logEl) return;
-      
-      // 获取所有日志条目
-      const logEntries = logEl.querySelectorAll('.log-entry');
-      if (logEntries.length === 0) {
-        showCenterMessage('暂无日志可复制', 'warning', 2000);
-        return;
-      }
-      
-      // 提取纯文本
-      const logText = Array.from(logEntries)
-        .map(entry => entry.getAttribute('data-log-text') || entry.textContent)
-        .join('\n');
-      
-      // 复制到剪贴板
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(logText)
-          .then(() => {
-            showCenterMessage('日志已复制到剪贴板', 'success', 2000);
-          })
-          .catch(err => {
-            console.error('复制失败:', err);
-            fallbackCopyLog(logText);
-          });
-      } else {
-        fallbackCopyLog(logText);
-      }
-    }
-    
+
     // 备用复制方法
     function fallbackCopyLog(text) {
       const textarea = document.createElement('textarea');

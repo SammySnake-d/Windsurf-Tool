@@ -5,298 +5,12 @@ const asarmor = require('asarmor');
 const JavaScriptObfuscator = require('javascript-obfuscator');
 
 // ====== ESM 依赖修复函数 ======
-// 将 chrome-launcher 及其依赖复制到 puppeteer-real-browser/node_modules 目录
-// 解决 ESM 动态导入 (await import()) 在 asar 打包环境中找不到模块的问题
 function fixEsmDependencies(unpackedPath) {
   console.log('   修复 ESM 依赖问题...');
   
-  const prbPath = path.join(unpackedPath, 'node_modules', 'puppeteer-real-browser');
-  if (!fs.existsSync(prbPath)) {
-    console.log('   ⚠️ 未找到 puppeteer-real-browser 目录');
-    return;
-  }
-  
-  // 需要复制到 puppeteer-real-browser/node_modules 的模块
-  // chrome-launcher 及其所有依赖
-  const modulesToCopy = [
-    'chrome-launcher',
-    '@types',  // @types/node 的父目录
-    'escape-string-regexp',
-    'is-wsl',
-    'lighthouse-logger',
-    'marky',
-    'debug',
-    'ms'
-  ];
-  
-  // 创建目标 node_modules 目录
-  const targetNodeModules = path.join(prbPath, 'node_modules');
-  if (!fs.existsSync(targetNodeModules)) {
-    fs.mkdirSync(targetNodeModules, { recursive: true });
-  }
-  
   let copiedCount = 0;
-  for (const moduleName of modulesToCopy) {
-    const sourcePath = path.join(unpackedPath, 'node_modules', moduleName);
-    const targetPath = path.join(targetNodeModules, moduleName);
-    
-    if (fs.existsSync(sourcePath) && !fs.existsSync(targetPath)) {
-      try {
-        copyDirSync(sourcePath, targetPath);
-        copiedCount++;
-        console.log(`   ✓ 复制 ${moduleName} -> puppeteer-real-browser/node_modules/`);
-      } catch (error) {
-        console.warn(`   ⚠️ 复制 ${moduleName} 失败: ${error.message}`);
-      }
-    }
-  }
   
-  // ====== 修复 rebrowser-puppeteer-core 内部的依赖 ======
-  const rebrowserPath = path.join(unpackedPath, 'node_modules', 'rebrowser-puppeteer-core', 'node_modules');
-  
-  // 1. 修复 proxy-agent 依赖
-  const proxyAgentPath = path.join(rebrowserPath, 'proxy-agent');
-  if (fs.existsSync(proxyAgentPath)) {
-    console.log('   修复 proxy-agent 依赖...');
-    
-    const proxyAgentDeps = [
-      'proxy-from-env',
-      'lru-cache',
-      'socks',
-      'ip-address',
-      'smart-buffer'
-    ];
-    
-    const proxyAgentNodeModules = path.join(proxyAgentPath, 'node_modules');
-    if (!fs.existsSync(proxyAgentNodeModules)) {
-      fs.mkdirSync(proxyAgentNodeModules, { recursive: true });
-    }
-    
-    for (const dep of proxyAgentDeps) {
-      const sourcePath = path.join(unpackedPath, 'node_modules', dep);
-      const targetPath = path.join(proxyAgentNodeModules, dep);
-      
-      if (fs.existsSync(sourcePath) && !fs.existsSync(targetPath)) {
-        try {
-          copyDirSync(sourcePath, targetPath);
-          copiedCount++;
-          console.log(`   ✓ 复制 ${dep} -> proxy-agent/node_modules/`);
-        } catch (error) {
-          console.warn(`   ⚠️ 复制 ${dep} 失败: ${error.message}`);
-        }
-      }
-    }
-  }
-  
-  // 定义 @puppeteer/browsers 需要的依赖列表（在外部定义以便复用）
-  // 完整覆盖所有嵌套依赖，避免 Windows 打包后出现依赖缺失
-  const browsersDeps = [
-      // extract-zip 及其依赖
-      'extract-zip',
-      'get-stream',
-      'pump',
-      'end-of-stream',
-      'once',
-      'wrappy',
-      'yauzl',
-      'fd-slicer',
-      'buffer-crc32',
-      'pend',
-      // progress
-      'progress',
-      // unbzip2-stream 及其依赖
-      'unbzip2-stream',
-      'buffer',
-      'through',
-      'base64-js',
-      'ieee754',
-      // yargs 及其依赖
-      'yargs',
-      'cliui',
-      'escalade',
-      'get-caller-file',
-      'require-directory',
-      'string-width',
-      'y18n',
-      'yargs-parser',
-      'strip-ansi',
-      'wrap-ansi',
-      'ansi-regex',
-      'ansi-styles',
-      'color-convert',
-      'color-name',
-      'emoji-regex',
-      'is-fullwidth-code-point',
-      // tar-fs 及其依赖（关键！Windows 缺失 mkdirp-classic）
-      'tar-stream',
-      'tar-fs',
-      'mkdirp-classic',
-      'bare-fs',
-      'bare-path',
-      'b4a',
-      'fast-fifo',
-      'streamx',
-      'text-decoder',
-      'events-universal',
-      'bare-events',
-      // semver
-      'semver',
-      // proxy-agent 及其完整依赖链
-      'proxy-agent',
-      'agent-base',
-      'http-proxy-agent',
-      'https-proxy-agent',
-      'pac-proxy-agent',
-      'socks-proxy-agent',
-      'proxy-from-env',
-      'lru-cache',
-      // pac-resolver 及其依赖
-      'pac-resolver',
-      'degenerator',
-      'ast-types',
-      'escodegen',
-      'esprima',
-      'estraverse',
-      'esutils',
-      'source-map',
-      'tslib',
-      'netmask',
-      // get-uri 及其依赖
-      'get-uri',
-      'basic-ftp',
-      'data-uri-to-buffer',
-      // socks 及其依赖
-      'socks',
-      'ip-address',
-      'smart-buffer',
-      'sprintf-js',
-      // is-wsl 的依赖
-      'is-docker',
-      // 通用依赖
-      'debug',
-      'ms',
-      // rebrowser-puppeteer-core 的依赖
-      'typed-query-selector',
-      'chromium-bidi',
-      'devtools-protocol',
-      'mitt',
-      'urlpattern-polyfill',
-      'zod',
-      'ws'
-  ];
-  
-  // 复制 @tootallnate 目录（pac-proxy-agent 的依赖）
-  const tootallnateSrc = path.join(unpackedPath, 'node_modules', '@tootallnate');
-  if (fs.existsSync(tootallnateSrc)) {
-    console.log('   复制 @tootallnate 依赖...');
-    // 这个会在后续的 browsersDeps 复制中一起处理
-  }
-  
-  // 2. 修复 rebrowser-puppeteer-core 内的 @puppeteer/browsers 依赖
-  const browsersPath = path.join(rebrowserPath, '@puppeteer', 'browsers');
-  if (fs.existsSync(browsersPath)) {
-    console.log('   修复 @puppeteer/browsers 依赖...');
-    
-    const browsersNodeModules = path.join(browsersPath, 'node_modules');
-    if (!fs.existsSync(browsersNodeModules)) {
-      fs.mkdirSync(browsersNodeModules, { recursive: true });
-    }
-    
-    for (const dep of browsersDeps) {
-      const sourcePath = path.join(unpackedPath, 'node_modules', dep);
-      const targetPath = path.join(browsersNodeModules, dep);
-      
-      if (fs.existsSync(sourcePath) && !fs.existsSync(targetPath)) {
-        try {
-          copyDirSync(sourcePath, targetPath);
-          copiedCount++;
-          console.log(`   ✓ 复制 ${dep} -> @puppeteer/browsers/node_modules/`);
-        } catch (error) {
-          console.warn(`   ⚠️ 复制 ${dep} 失败: ${error.message}`);
-        }
-      }
-    }
-    
-    // 复制 @tootallnate 到 @puppeteer/browsers/node_modules
-    const tootallnateTarget = path.join(browsersNodeModules, '@tootallnate');
-    if (fs.existsSync(tootallnateSrc) && !fs.existsSync(tootallnateTarget)) {
-      try {
-        copyDirSync(tootallnateSrc, tootallnateTarget);
-        copiedCount++;
-        console.log(`   ✓ 复制 @tootallnate -> @puppeteer/browsers/node_modules/`);
-      } catch (error) {
-        console.warn(`   ⚠️ 复制 @tootallnate 失败: ${error.message}`);
-      }
-    }
-  }
-  
-  // 3. 修复根目录的 @puppeteer/browsers 依赖
-  const rootBrowsersPath = path.join(unpackedPath, 'node_modules', '@puppeteer', 'browsers');
-  if (fs.existsSync(rootBrowsersPath)) {
-    console.log('   修复根目录 @puppeteer/browsers 依赖...');
-    
-    const rootBrowsersNodeModules = path.join(rootBrowsersPath, 'node_modules');
-    if (!fs.existsSync(rootBrowsersNodeModules)) {
-      fs.mkdirSync(rootBrowsersNodeModules, { recursive: true });
-    }
-    
-    for (const dep of browsersDeps) {
-      const sourcePath = path.join(unpackedPath, 'node_modules', dep);
-      const targetPath = path.join(rootBrowsersNodeModules, dep);
-      
-      if (fs.existsSync(sourcePath) && !fs.existsSync(targetPath)) {
-        try {
-          copyDirSync(sourcePath, targetPath);
-          copiedCount++;
-          console.log(`   ✓ 复制 ${dep} -> 根目录@puppeteer/browsers/node_modules/`);
-        } catch (error) {
-          console.warn(`   ⚠️ 复制 ${dep} 失败: ${error.message}`);
-        }
-      }
-    }
-    
-    // 复制 @tootallnate 到根目录 @puppeteer/browsers/node_modules
-    const rootTootallnateTarget = path.join(rootBrowsersNodeModules, '@tootallnate');
-    if (fs.existsSync(tootallnateSrc) && !fs.existsSync(rootTootallnateTarget)) {
-      try {
-        copyDirSync(tootallnateSrc, rootTootallnateTarget);
-        copiedCount++;
-        console.log(`   ✓ 复制 @tootallnate -> 根目录@puppeteer/browsers/node_modules/`);
-      } catch (error) {
-        console.warn(`   ⚠️ 复制 @tootallnate 失败: ${error.message}`);
-      }
-    }
-  }
-  
-  // 4. 修复 extract-zip 的依赖（确保 get-stream 和 yauzl 在正确位置）
-  const extractZipPath = path.join(browsersPath, 'node_modules', 'extract-zip');
-  if (fs.existsSync(extractZipPath)) {
-    console.log('   修复 extract-zip 依赖...');
-    
-    const extractZipDeps = ['get-stream', 'pump', 'end-of-stream', 'once', 'wrappy', 'yauzl', 'fd-slicer', 'buffer-crc32', 'pend'];
-    const extractZipNodeModules = path.join(extractZipPath, 'node_modules');
-    
-    if (!fs.existsSync(extractZipNodeModules)) {
-      fs.mkdirSync(extractZipNodeModules, { recursive: true });
-    }
-    
-    for (const dep of extractZipDeps) {
-      const sourcePath = path.join(unpackedPath, 'node_modules', dep);
-      const targetPath = path.join(extractZipNodeModules, dep);
-      
-      if (fs.existsSync(sourcePath) && !fs.existsSync(targetPath)) {
-        try {
-          copyDirSync(sourcePath, targetPath);
-          copiedCount++;
-          console.log(`   ✓ 复制 ${dep} -> extract-zip/node_modules/`);
-        } catch (error) {
-          console.warn(`   ⚠️ 复制 ${dep} 失败: ${error.message}`);
-        }
-      }
-    }
-  }
-  
-  // 5. 修复 mailparser/parseley 依赖链
+  // 修复 mailparser/parseley 依赖链
   // parseley 需要 leac 和 peberminta，但它们可能没有被正确解包
   const parseleyPath = path.join(unpackedPath, 'node_modules', 'parseley');
   if (fs.existsSync(parseleyPath)) {
@@ -422,12 +136,7 @@ const obfuscateConfig = {
     'AccountManager', 'AccountQuery', 'switchToAccount', 'lucide',
     'AutoBindCard', 'ipcRenderer', 'showCenterMessage', 'electron',
     'app', 'BrowserWindow', 'ipcMain', 'shell', 'dialog', 'Menu',
-    'log', 'warn', 'error', 'info', 'debug',
-    // Puppeteer 相关方法
-    'page', 'browser', 'puppeteer', 'launch', 'newPage', 'goto', 'click',
-    'type', 'waitForSelector', 'waitForTimeout', 'waitForNavigation',
-    'evaluate', 'evaluateHandle', 'focus', 'select', 'close', 'screenshot',
-    'frames', 'mainFrame', 'content', 'setViewport', 'cookies', 'setCookie', 'deleteCookie'
+    'log', 'warn', 'error', 'info', 'debug'
   ],
   reservedStrings: ['console', 'ipcRenderer', 'lucide', 'electron']
 };
@@ -445,9 +154,8 @@ function obfuscateFile(filePath) {
   }
 }
 
-// 不混淆的文件列表（包含 page.evaluate 等需要在浏览器上下文执行的代码，或需要调试的模块）
+// 不混淆的文件列表（需要调试的模块）
 const excludeFiles = [
-  'registrationBot.js',
   'autoBindCard.js',
   'accountSwitcher.js'  // 切号功能，不混淆便于调试
 ];
@@ -468,7 +176,7 @@ function obfuscateDirectory(dir, excludeDirs = ['node_modules']) {
     } else if (entry.isFile() && entry.name.endsWith('.js')) {
       // 跳过排除列表中的文件
       if (excludeFiles.includes(entry.name)) {
-        console.log(`   ⏭️ 跳过混淆: ${entry.name} (包含浏览器上下文代码)`);
+        console.log(`   ⏭️ 跳过混淆: ${entry.name} (用于调试)`);
         continue;
       }
       if (obfuscateFile(fullPath)) count++;
