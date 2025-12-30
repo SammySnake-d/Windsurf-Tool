@@ -56,6 +56,11 @@ process.stderr.on('error', (err) => {
 
 let mainWindow;
 
+// 状态管理变量
+let isForceUpdateActive = false;
+let isMaintenanceModeActive = false;
+let isApiUnavailable = false;
+
 // 应用名称 - 必须设置为 'Windsurf' 以使用相同的 Keychain 密钥
 app.setName('Windsurf');
 
