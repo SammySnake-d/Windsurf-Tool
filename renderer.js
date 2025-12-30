@@ -2,6 +2,10 @@
 // 将 ipcRenderer 挂载到 window 对象，供全局使用
 window.ipcRenderer = require('electron').ipcRenderer;
 
+// 状态管理变量（渲染进程）
+let isForceUpdateActive = false;
+let isMaintenanceModeActive = false;
+
 // 加载 lucide 图标库
 try {
   const lucideModule = require('lucide');
