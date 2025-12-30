@@ -102,10 +102,10 @@ show_options() {
     
     echo "请选择打包架构:"
     echo ""
-    echo "  1) Universal (x64 + arm64) - 推荐"
+    echo "  1) 分别打包 x64 和 arm64 - 推荐"
     echo "  2) Intel only (x64)"
     echo "  3) Apple Silicon only (arm64)"
-    echo "  4) 分别打包 x64 和 arm64"
+    echo "  4) Universal (x64 + arm64)"
     echo ""
 }
 
@@ -114,7 +114,7 @@ build_universal() {
     print_header "📦 打包 Universal 版本 (x64 + arm64)"
     
     print_info "开始打包..."
-    npm run build:mac
+    npm run build:mac:universal
     
     if [ $? -eq 0 ]; then
         print_success "Universal 打包完成"
@@ -272,7 +272,7 @@ main() {
     # 6. 执行打包
     case $choice in
         1)
-            build_universal
+            build_separate
             ;;
         2)
             build_x64
@@ -281,7 +281,7 @@ main() {
             build_arm64
             ;;
         4)
-            build_separate
+            build_universal
             ;;
         *)
             print_error "无效的选择"
