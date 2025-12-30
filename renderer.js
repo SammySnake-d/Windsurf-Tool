@@ -5,6 +5,14 @@ window.ipcRenderer = require('electron').ipcRenderer;
 // 状态管理变量（渲染进程）
 let isForceUpdateActive = false;
 let isMaintenanceModeActive = false;
+let isQuitting = false;
+
+// 版本检测冷却（避免用户频繁点击）
+let lastVersionCheckTime = 0;
+const versionCheckCooldown = 30 * 1000;
+
+// 当前显示中的版本更新信息
+let versionUpdateInfo = null;
 
 // 加载 lucide 图标库
 try {
