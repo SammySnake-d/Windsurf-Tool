@@ -9,8 +9,12 @@ permissions:
 
 jobs:
   build-mac:
-    name: Build macOS (x64 + arm64)
+    name: Build macOS (${{ matrix.arch }})
     runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, arm64]
 
     steps:
       - name: Checkout repository
@@ -32,13 +36,12 @@ jobs:
         run: |
           npx electron-builder \
             --mac \
-            --x64 \
-            --arm64
+            --${{ matrix.arch }}
 
       - name: Upload macOS DMG artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Windsurf-Tool-macOS
+          name: Windsurf-Tool-macOS-${{ matrix.arch }}
           path: |
             release/*.dmg
             release/*.blockmap
